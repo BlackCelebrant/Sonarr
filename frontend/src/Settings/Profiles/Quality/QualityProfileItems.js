@@ -20,7 +20,8 @@ class QualityProfileItems extends Component {
     super(props, context);
 
     this.state = {
-      qualitiesHeight: 0
+      qualitiesHeight: 0,
+      qualitiesHeightEditGroups: 0
     };
   }
 
@@ -32,7 +33,11 @@ class QualityProfileItems extends Component {
   // Listeners
 
   onMeasure = ({ height }) => {
-    if (height > this.state.qualitiesHeight) {
+    if (this.props.editGroups) {
+      this.setState({
+        qualitiesHeightEditGroups: height
+      });
+    } else {
       this.setState({ qualitiesHeight: height });
     }
   }
@@ -55,9 +60,15 @@ class QualityProfileItems extends Component {
       ...otherProps
     } = this.props;
 
+    const {
+      qualitiesHeight,
+      qualitiesHeightEditGroups
+    } = this.state;
+
     const isDragging = dropQualityIndex !== null;
     const isDraggingUp = isDragging && dropPosition === 'above';
     const isDraggingDown = isDragging && dropPosition === 'below';
+    const minHeight = editGroups ? qualitiesHeightEditGroups : qualitiesHeight;
 
     return (
       <FormGroup size={sizes.EXTRA_SMALL}>
@@ -112,6 +123,7 @@ class QualityProfileItems extends Component {
               }
             </div>
           </Button>
+
           <Measure
             whitelist={['height']}
             includeMargin={false}
@@ -119,6 +131,7 @@ class QualityProfileItems extends Component {
           >
             <div
               className={styles.qualities}
+              style={{ minHeight: `${minHeight}px` }}
             >
               {
                 qualityProfileItems.map(({ id, name, allowed, quality, items }, index) => {

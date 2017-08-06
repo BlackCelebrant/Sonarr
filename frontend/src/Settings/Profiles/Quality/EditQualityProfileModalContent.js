@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Measure from 'react-measure';
 import { inputTypes, kinds, sizes } from 'Helpers/Props';
+import dimensions from 'Styles/Variables/dimensions';
 import Button from 'Components/Link/Button';
 import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -15,6 +16,8 @@ import FormLabel from 'Components/Form/FormLabel';
 import FormInputGroup from 'Components/Form/FormInputGroup';
 import QualityProfileItems from './QualityProfileItems';
 import styles from './EditQualityProfileModalContent.css';
+
+const MODAL_BODY_PADDING = parseInt(dimensions.modalBodyPadding);
 
 class EditQualityProfileModalContent extends Component {
 
@@ -48,7 +51,11 @@ class EditQualityProfileModalContent extends Component {
         footerHeight !== prevState.footerHeight
       )
     ) {
-      this.props.onContentHeightChange(headerHeight + bodyHeight + footerHeight);
+      const padding = MODAL_BODY_PADDING * 2;
+
+      this.props.onContentHeightChange(
+        headerHeight + bodyHeight + footerHeight + padding
+      );
     }
   }
 
@@ -62,6 +69,7 @@ class EditQualityProfileModalContent extends Component {
   }
 
   onBodyMeasure = ({ height }) => {
+
     if (height > this.state.bodyHeight) {
       this.setState({ bodyHeight: height });
     }
@@ -116,7 +124,6 @@ class EditQualityProfileModalContent extends Component {
         <ModalBody>
           <Measure
             whitelist={['height']}
-            includeMargin={false}
             onMeasure={this.onBodyMeasure}
           >
             <div>

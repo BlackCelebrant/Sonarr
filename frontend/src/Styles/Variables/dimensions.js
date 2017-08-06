@@ -41,8 +41,8 @@ module.exports = {
   progressBarLargeHeight: '20px',
 
   // Jump Bar
-  jumpBarItemHeight: '25px'
+  jumpBarItemHeight: '25px',
 
-  // Series
-
+  // Modal
+  modalBodyPadding: '30px'
 };
