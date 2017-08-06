@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { Component } from 'react';
+import Measure from 'react-measure';
 import { inputTypes, kinds, sizes } from 'Helpers/Props';
 import Button from 'Components/Link/Button';
 import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
@@ -15,132 +16,213 @@ import FormInputGroup from 'Components/Form/FormInputGroup';
 import QualityProfileItems from './QualityProfileItems';
 import styles from './EditQualityProfileModalContent.css';
 
-function EditQualityProfileModalContent(props) {
-  const {
-    editGroups,
-    isFetching,
-    error,
-    isSaving,
-    saveError,
-    qualities,
-    item,
-    isInUse,
-    onInputChange,
-    onCutoffChange,
-    onSavePress,
-    onModalClose,
-    onDeleteQualityProfilePress,
-    ...otherProps
-  } = props;
+class EditQualityProfileModalContent extends Component {
 
-  const {
-    id,
-    name,
-    cutoff,
-    items
-  } = item;
+  //
+  // Lifecycle
 
-  return (
-    <ModalContent onModalClose={onModalClose}>
-      <ModalHeader>
-        {id ? 'Edit Quality Profile' : 'Add Quality Profile'}
-      </ModalHeader>
+  constructor(props, context) {
+    super(props, context);
 
-      <ModalBody>
-        {
-          isFetching &&
-            <LoadingIndicator />
-        }
+    this.state = {
+      headerHeight: 0,
+      bodyHeight: 0,
+      footerHeight: 0
+    };
+  }
 
-        {
-          !isFetching && !!error &&
-            <div>Unable to add a new quality profile, please try again.</div>
-        }
+  componentDidUpdate(prevProps, prevState) {
+    const {
+      headerHeight,
+      bodyHeight,
+      footerHeight
+    } = this.state;
 
-        {
-          !isFetching && !error &&
-            <Form
-              {...otherProps}
-            >
-              <div className={styles.formGroupsContainer}>
-                <div className={styles.formGroupWrapper}>
-                  <FormGroup size={sizes.EXTRA_SMALL}>
-                    <FormLabel size={sizes.small}>
-                      Name
-                    </FormLabel>
+    if (
+      headerHeight > 0 &&
+      bodyHeight > 0 &&
+      footerHeight > 0 &&
+      (
+        headerHeight !== prevState.headerHeight ||
+        bodyHeight !== prevState.bodyHeight ||
+        footerHeight !== prevState.footerHeight
+      )
+    ) {
+      this.props.onContentHeightChange(headerHeight + bodyHeight + footerHeight);
+    }
+  }
 
-                    <FormInputGroup
-                      type={inputTypes.TEXT}
-                      name="name"
-                      {...name}
-                      onChange={onInputChange}
-                    />
-                  </FormGroup>
+  //
+  // Listeners
 
-                  <FormGroup size={sizes.EXTRA_SMALL}>
-                    <FormLabel size={sizes.small}>
-                      Cutoff
-                    </FormLabel>
+  onHeaderMeasure = ({ height }) => {
+    if (height > this.state.headerHeight) {
+      this.setState({ headerHeight: height });
+    }
+  }
 
-                    <FormInputGroup
-                      type={inputTypes.SELECT}
-                      name="cutoff"
-                      {...cutoff}
-                      values={qualities}
-                      helpText="Once this quality is reached Sonarr will no longer download episodes"
-                      onChange={onCutoffChange}
-                    />
-                  </FormGroup>
-                </div>
+  onBodyMeasure = ({ height }) => {
+    if (height > this.state.bodyHeight) {
+      this.setState({ bodyHeight: height });
+    }
+  }
 
-                <div className={styles.formGroupWrapper}>
-                  <QualityProfileItems
-                    editGroups={editGroups}
-                    qualityProfileItems={items.value}
-                    errors={items.errors}
-                    warnings={items.warnings}
+  onFooterMeasure = ({ height }) => {
+    if (height > this.state.footerHeight) {
+      this.setState({ footerHeight: height });
+    }
+  }
+
+  //
+  // Render
+
+  render() {
+    const {
+      editGroups,
+      isFetching,
+      error,
+      isSaving,
+      saveError,
+      qualities,
+      item,
+      isInUse,
+      onInputChange,
+      onCutoffChange,
+      onSavePress,
+      onModalClose,
+      onDeleteQualityProfilePress,
+      ...otherProps
+    } = this.props;
+
+    const {
+      id,
+      name,
+      cutoff,
+      items
+    } = item;
+
+    return (
+      <ModalContent onModalClose={onModalClose}>
+        <Measure
+          whitelist={['height']}
+          includeMargin={false}
+          onMeasure={this.onHeaderMeasure}
+        >
+          <ModalHeader>
+            {id ? 'Edit Quality Profile' : 'Add Quality Profile'}
+          </ModalHeader>
+        </Measure>
+
+        <ModalBody>
+          <Measure
+            whitelist={['height']}
+            includeMargin={false}
+            onMeasure={this.onBodyMeasure}
+          >
+            <div>
+              {
+                isFetching &&
+                  <LoadingIndicator />
+              }
+
+              {
+                !isFetching && !!error &&
+                  <div>Unable to add a new quality profile, please try again.</div>
+              }
+
+              {
+                !isFetching && !error &&
+                  <Form
                     {...otherProps}
-                  />
-                </div>
-              </div>
-            </Form>
+                  >
+                    <div className={styles.formGroupsContainer}>
+                      <div className={styles.formGroupWrapper}>
+                        <FormGroup size={sizes.EXTRA_SMALL}>
+                          <FormLabel size={sizes.small}>
+                            Name
+                          </FormLabel>
 
-        }
-      </ModalBody>
+                          <FormInputGroup
+                            type={inputTypes.TEXT}
+                            name="name"
+                            {...name}
+                            onChange={onInputChange}
+                          />
+                        </FormGroup>
 
-      <ModalFooter>
-        {
-          id &&
-            <div
-              className={styles.deleteButtonContainer}
-              title={isInUse && 'Can\'t delete a quality profile that is attached to a series'}
-            >
-              <Button
-                kind={kinds.DANGER}
-                isDisabled={isInUse}
-                onPress={onDeleteQualityProfilePress}
-              >
-                Delete
-              </Button>
+                        <FormGroup size={sizes.EXTRA_SMALL}>
+                          <FormLabel size={sizes.small}>
+                            Cutoff
+                          </FormLabel>
+
+                          <FormInputGroup
+                            type={inputTypes.SELECT}
+                            name="cutoff"
+                            {...cutoff}
+                            values={qualities}
+                            helpText="Once this quality is reached Sonarr will no longer download episodes"
+                            onChange={onCutoffChange}
+                          />
+                        </FormGroup>
+                      </div>
+
+                      <div className={styles.formGroupWrapper}>
+                        <QualityProfileItems
+                          editGroups={editGroups}
+                          qualityProfileItems={items.value}
+                          errors={items.errors}
+                          warnings={items.warnings}
+                          {...otherProps}
+                        />
+                      </div>
+                    </div>
+                  </Form>
+
+              }
             </div>
-        }
+          </Measure>
+        </ModalBody>
 
-        <Button
-          onPress={onModalClose}
+        <Measure
+          whitelist={['height']}
+          includeMargin={false}
+          onMeasure={this.onFooterMeasure}
         >
-          Cancel
-        </Button>
+          <ModalFooter>
+            {
+              id &&
+                <div
+                  className={styles.deleteButtonContainer}
+                  title={isInUse && 'Can\'t delete a quality profile that is attached to a series'}
+                >
+                  <Button
+                    kind={kinds.DANGER}
+                    isDisabled={isInUse}
+                    onPress={onDeleteQualityProfilePress}
+                  >
+                    Delete
+                  </Button>
+                </div>
+            }
 
-        <SpinnerErrorButton
-          isSpinning={isSaving}
-          error={saveError}
-          onPress={onSavePress}
-        >
-          Save
-        </SpinnerErrorButton>
-      </ModalFooter>
-    </ModalContent>
-  );
+            <Button
+              onPress={onModalClose}
+            >
+              Cancel
+            </Button>
+
+            <SpinnerErrorButton
+              isSpinning={isSaving}
+              error={saveError}
+              onPress={onSavePress}
+            >
+              Save
+            </SpinnerErrorButton>
+          </ModalFooter>
+        </Measure>
+      </ModalContent>
+    );
+  }
 }
 
 EditQualityProfileModalContent.propTypes = {
@@ -155,6 +237,7 @@ EditQualityProfileModalContent.propTypes = {
   onInputChange: PropTypes.func.isRequired,
   onCutoffChange: PropTypes.func.isRequired,
   onSavePress: PropTypes.func.isRequired,
+  onContentHeightChange: PropTypes.func.isRequired,
   onModalClose: PropTypes.func.isRequired,
   onDeleteQualityProfilePress: PropTypes.func
 };

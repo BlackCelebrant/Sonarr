@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Measure from 'react-measure';
 import { icons, kinds, sizes } from 'Helpers/Props';
-import dimensions from 'Styles/Variables/dimensions';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
 import FormGroup from 'Components/Form/FormGroup';
@@ -11,9 +10,6 @@ import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import QualityProfileItemDragSource from './QualityProfileItemDragSource';
 import QualityProfileItemDragPreview from './QualityProfileItemDragPreview';
 import styles from './QualityProfileItems.css';
-
-const ITEM_HEIGHT = parseInt(dimensions.qualityProfileItemHeight);
-const ITEM_PADDING = parseInt(dimensions.qualityProfileItemDragSourcePadding);
 
 class QualityProfileItems extends Component {
 
@@ -123,7 +119,6 @@ class QualityProfileItems extends Component {
           >
             <div
               className={styles.qualities}
-              style={{ minHeight: `${this.state.qualitiesHeight}px` }}
             >
               {
                 qualityProfileItems.map(({ id, name, allowed, quality, items }, index) => {
